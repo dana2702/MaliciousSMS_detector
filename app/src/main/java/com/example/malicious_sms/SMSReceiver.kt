@@ -8,51 +8,107 @@ import android.content.Context
 import android.content.Intent
 import android.os.Build
 import android.telephony.SmsMessage
+import android.util.Base64
 import androidx.core.app.NotificationCompat
+import okhttp3.OkHttpClient
+import okhttp3.Request
+import okhttp3.Response
+import java.net.URLEncoder
 
 class SMSReceiver : BroadcastReceiver() {
 
+    private val virusTotalApiKey = "0f481f09151679f72cda593a5e824fe8c3cda57dc02982330fe551122607270b" // our KEY
+
     override fun onReceive(context: Context, intent: Intent?) {
-        // Get the SMS messages from the intent
         val pdus = intent?.extras?.get("pdus") as? Array<*>
         val messages = pdus?.mapNotNull { pdu ->
             SmsMessage.createFromPdu(pdu as ByteArray)
         }
 
-        // Check if any message contains the suspicious pattern "//http"
         messages?.forEach { message ->
             val messageBody = message.messageBody
-            if (messageBody.contains("//http", ignoreCase = true)) {
-                // Build the notification for suspicious SMS
-                val smsNotification = NotificationCompat.Builder(context, "SMS_CHANNEL")
-                    .setSmallIcon(android.R.drawable.ic_dialog_alert) // Set an alert icon
-                    .setContentTitle("Suspicious SMS Detected")
-                    .setContentText("A suspicious message was received containing a URL: $messageBody")
-                    .setPriority(NotificationCompat.PRIORITY_HIGH) // Make the notification high priority
-                    .setCategory(NotificationCompat.CATEGORY_MESSAGE)
-                    .setAutoCancel(true) // Auto-cancel when tapped
-                    .setDefaults(Notification.DEFAULT_SOUND or Notification.DEFAULT_VIBRATE) // Default sound and vibration
-                    .build()
 
-                // Create notification channel for Android 8.0 and above
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    val channel = NotificationChannel(
-                        "SMS_CHANNEL", // Unique channel ID
-                        "SMS Notifications", // Channel name
-                        NotificationManager.IMPORTANCE_HIGH // High importance to show the notification immediately
-                    )
-                    channel.enableLights(true) // Optional: Enable light for notifications
-                    channel.enableVibration(true) // Optional: Enable vibration for notifications
+            // Look for URLs (you can improve this regex later)
+            val regex = Regex("(https?://\\S+)")
+            val foundUrls = regex.findAll(messageBody)
 
-                    val notificationManager =
-                        context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                    notificationManager.createNotificationChannel(channel)
+            for (match in foundUrls) {
+                val url = match.value
+
+                // Check the URL using VirusTotal
+                checkUrlWithVirusTotal(context, url) { isMalicious ->
+                    if (isMalicious) {
+                        showWarningNotification(context, "Malicious link detected: $url")
+                    }
                 }
-
-                // Issue the notification
-                val notificationManager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
-                notificationManager.notify(1, smsNotification) // Use ID 1 to allow updating/canceling
             }
         }
+    }
+
+    private fun showWarningNotification(context: Context, message: String) {
+        val channelId = "MALICIOUS_SMS_CHANNEL"
+
+        // Create notification channel for Android O+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            val channel = NotificationChannel(
+                channelId,
+                "Malicious SMS Alerts",
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                enableLights(true)
+                enableVibration(true)
+            }
+            val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+            manager.createNotificationChannel(channel)
+        }
+
+        val notification = NotificationCompat.Builder(context, channelId)
+            .setSmallIcon(android.R.drawable.ic_dialog_alert)
+            .setContentTitle("⚠️ Malicious URL Detected!")
+            .setContentText(message)
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setDefaults(Notification.DEFAULT_ALL)
+            .setAutoCancel(true)
+            .build()
+
+        val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
+        manager.notify(System.currentTimeMillis().toInt(), notification) // unique ID for each notification
+    }
+
+    private fun checkUrlWithVirusTotal(context: Context, urlToCheck: String, onResult: (Boolean) -> Unit) {
+        val client = OkHttpClient()
+
+        // Encode URL as required by VirusTotal API
+        val base64Url = Base64.encodeToString(urlToCheck.toByteArray(), Base64.URL_SAFE or Base64.NO_WRAP)
+
+        val request = Request.Builder()
+            .url("https://www.virustotal.com/api/v3/urls/$base64Url")
+            .get()
+            .addHeader("x-apikey", virusTotalApiKey)
+            .build()
+
+        val call = client.newCall(request)
+        call.enqueue(object : okhttp3.Callback {
+            override fun onFailure(call: okhttp3.Call, e: java.io.IOException) {
+                e.printStackTrace()
+                onResult(false)
+            }
+
+            override fun onResponse(call: okhttp3.Call, response: Response) {
+                response.use {
+                    if (!response.isSuccessful) {
+                        onResult(false)
+                    } else {
+                        val body = response.body?.string()
+                        if (body != null && body.contains("\"malicious\"", ignoreCase = true)) {
+                            onResult(true)
+                        } else {
+                            onResult(false)
+                        }
+                    }
+                }
+            }
+        })
     }
 }

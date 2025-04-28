@@ -13,6 +13,8 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"
         tools:targetApi="33" />
+    <uses-permission android:name="android.permission.INTERNET" />
+
 
     <application
         android:allowBackup="true"
@@ -33,7 +35,7 @@
         <receiver
             android:name=".SMSReceiver"
             android:exported="true">
-            <intent-filter android:priority="999">
+            <intent-filter android:priority="999">  <!-- affects how "fast" my app will get the SMS compared to other apps -->
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
