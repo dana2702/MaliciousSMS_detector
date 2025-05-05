@@ -8,13 +8,17 @@
         android:name="android.hardware.telephony"
         android:required="false" />
 
+    <!-- SMS permissions -->
     <uses-permission android:name="android.permission.RECEIVE_SMS" />
     <uses-permission android:name="android.permission.READ_SMS" />
+
+    <!-- Permissions for foreground service and notifications -->
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS"
         tools:targetApi="33" />
-    <uses-permission android:name="android.permission.INTERNET" />
 
+    <!-- Internet permission (if required for any online feature) -->
+    <uses-permission android:name="android.permission.INTERNET" />
 
     <application
         android:allowBackup="true"
@@ -24,7 +28,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.Malicious_SMS">
 
-        <activity android:name=".MainActivity"
+        <!-- Main Activity -->
+        <activity
+            android:name=".MainActivity"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -32,10 +38,22 @@
             </intent-filter>
         </activity>
 
+        <!-- SMS Notification Listener Service -->
+        <service
+            android:name=".SMSNotificationListener"
+            android:label="SMS Notification Listener"
+            android:permission="android.permission.BIND_NOTIFICATION_LISTENER_SERVICE"
+            android:exported="false">
+            <intent-filter>
+                <action android:name="android.service.notification.NotificationListenerService" />
+            </intent-filter>
+        </service>
+
+        <!-- SMS Broadcast Receiver -->
         <receiver
             android:name=".SMSReceiver"
             android:exported="true">
-            <intent-filter android:priority="999">  <!-- affects how "fast" my app will get the SMS compared to other apps -->
+            <intent-filter android:priority="999">
                 <action android:name="android.provider.Telephony.SMS_RECEIVED" />
             </intent-filter>
         </receiver>
