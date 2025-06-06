@@ -16,6 +16,9 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        // Add your VirusTotal API key here (replace with your actual key)
+        buildConfigField("String", "VT_API_KEY", "\"0f481f09151679f72cda593a5e824fe8c3cda57dc02982330fe551122607270b\"")
     }
 
     buildTypes {
@@ -38,6 +41,7 @@ android {
         compose = true
     }
 }
+
 
 dependencies {
 

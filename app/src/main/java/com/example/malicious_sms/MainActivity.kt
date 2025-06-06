@@ -23,6 +23,9 @@ class MainActivity : ComponentActivity() {
         Manifest.permission.READ_SMS,
     ).toMutableList()
 
+
+    // Entry point for the activity. Sets up the UI, requests permissions,
+    // creates the notification channel, and prompts for notification access.
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -46,7 +49,8 @@ class MainActivity : ComponentActivity() {
 
     }
 
-    // Request SMS and notification permissions if not granted
+    // Checks which permissions (SMS and notifications) are not yet granted,
+    // and requests them from the user if needed.
     private fun requestPermissionsIfNeeded() {
         val toRequest = permissions.filter {
             ContextCompat.checkSelfPermission(this, it) != PackageManager.PERMISSION_GRANTED
@@ -56,6 +60,8 @@ class MainActivity : ComponentActivity() {
             ActivityCompat.requestPermissions(this, toRequest.toTypedArray(), 1)
         }
     }
+
+
 
     // Create high-priority notification channel for suspicious SMS alerts
     private fun createNotificationChannel() {
@@ -95,7 +101,6 @@ class MainActivity : ComponentActivity() {
 
     // Function to handle "Allow Access" button click
     fun onAllowAccessClicked() {
-        // You can add additional logic or display a toast when the button is clicked
         Toast.makeText(this, "Please grant access to the app.", Toast.LENGTH_SHORT).show()
     }
 }

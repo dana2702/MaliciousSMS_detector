@@ -19,6 +19,9 @@ class SMSReceiver : BroadcastReceiver() {
 
     private val virusTotalApiKey = "0f481f09151679f72cda593a5e824fe8c3cda57dc02982330fe551122607270b" // our KEY
 
+
+    // Triggered when an SMS is received. Extracts the message content,
+    // searches for URLs, and checks them for malicious activity using VirusTotal.
     override fun onReceive(context: Context, intent: Intent?) {
         val pdus = intent?.extras?.get("pdus") as? Array<*>
         val messages = pdus?.mapNotNull { pdu ->
@@ -28,7 +31,7 @@ class SMSReceiver : BroadcastReceiver() {
         messages?.forEach { message ->
             val messageBody = message.messageBody
 
-            // Look for URLs (you can improve this regex later)
+            // Look for URLs (can start with either http or https)
             val regex = Regex("(https?://\\S+)")
             val foundUrls = regex.findAll(messageBody)
 
@@ -45,6 +48,10 @@ class SMSReceiver : BroadcastReceiver() {
         }
     }
 
+
+
+    // Displays a high-priority notification alerting the user about
+    // a detected malicious URL in an SMS.
     private fun showWarningNotification(context: Context, message: String) {
         val channelId = "MALICIOUS_SMS_CHANNEL"
 
@@ -76,6 +83,10 @@ class SMSReceiver : BroadcastReceiver() {
         manager.notify(System.currentTimeMillis().toInt(), notification) // unique ID for each notification
     }
 
+
+
+    // Sends the given URL to the VirusTotal API to check if it's marked as malicious.
+    // Calls onResult(true) if malicious, otherwise false.
     private fun checkUrlWithVirusTotal(context: Context, urlToCheck: String, onResult: (Boolean) -> Unit) {
         val client = OkHttpClient()
 

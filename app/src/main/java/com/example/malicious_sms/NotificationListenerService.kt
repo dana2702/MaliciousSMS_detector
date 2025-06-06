@@ -18,7 +18,6 @@ class SMSNotificationListener : NotificationListenerService() {
 
             if ("//http" in text) {
                 Log.d("SMSNotificationListener", "Suspicious link detected from $title: $text")
-                // TODO: Optionally trigger a custom notification here
             }
         }
     }
