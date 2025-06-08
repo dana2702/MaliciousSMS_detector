@@ -4,18 +4,14 @@ import android.Manifest
 import android.annotation.SuppressLint
 import android.app.NotificationChannel
 import android.app.NotificationManager
-import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
-import android.provider.Settings
 import android.widget.TextView
-import android.widget.Toast
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
-import androidx.appcompat.app.AlertDialog.Builder
 import androidx.appcompat.app.AppCompatActivity
 
 class MainActivity : AppCompatActivity() {
@@ -24,7 +20,6 @@ class MainActivity : AppCompatActivity() {
         Manifest.permission.RECEIVE_SMS,
         Manifest.permission.READ_SMS,
     ).toMutableList()
-
 
     private lateinit var smsTextView: TextView
     private val handler = Handler(Looper.getMainLooper())
@@ -51,13 +46,12 @@ class MainActivity : AppCompatActivity() {
         createNotificationChannel()
 
         // Prompt for notification access if not granted
-
         smsTextView = findViewById(R.id.smsTextView)
 
         startAutoRefresh()
     }
 
-
+    //starts a loop that automatically refreshes the SMS display every 3 seconds.
     private fun startAutoRefresh() {
         handler.post(object : Runnable {
             override fun run() {
@@ -67,6 +61,7 @@ class MainActivity : AppCompatActivity() {
         })
     }
 
+    //updates the TextView on the screen with the current list of suspicious SMS
     private fun updateSMSDisplay() {
         val smsList = SuspiciousSMS.list1
         val displayText = if (smsList.isNotEmpty()) {
@@ -89,8 +84,6 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-
-
     // Create high-priority notification channel for suspicious SMS alerts
     private fun createNotificationChannel() {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -107,4 +100,3 @@ class MainActivity : AppCompatActivity() {
         }
     }
 }
-

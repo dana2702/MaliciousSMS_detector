@@ -21,7 +21,6 @@ class SMSReceiver : BroadcastReceiver() {
 
     private val virusTotalApiKey = "0f481f09151679f72cda593a5e824fe8c3cda57dc02982330fe551122607270b" // our KEY
 
-
     // Triggered when an SMS is received. Extracts the message content,
     // searches for URLs, and checks them for malicious activity using VirusTotal.
     override fun onReceive(context: Context, intent: Intent?) {
@@ -37,7 +36,7 @@ class SMSReceiver : BroadcastReceiver() {
             val date = Date(timestamp)
             val formatter = SimpleDateFormat("dd/mm/yy HH:mm", Locale.getDefault())
             val formattedDate = formatter.format(date)
-            // Look for URLs (can start with either http or https)
+            // Look for URLs (can start with either http or https or others)
             val regex = Regex("""((https?|ftp)://\S+|www\.\S+|\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b\S*)""")
             val foundUrls = regex.findAll(messageBody)
 
@@ -47,13 +46,11 @@ class SMSReceiver : BroadcastReceiver() {
                 // Check the URL using VirusTotal
                 checkUrlWithVirusTotal(context, url) { isMalicious ->
                     if (isMalicious) {
-
-
                         val notificationText = """
-        Suspicious link detected from $sender on $formattedDate:
-        $url
-        Message: $messageBody
-    """.trimIndent()
+                                Suspicious link detected from $sender on $formattedDate:
+                                $url
+                                Message: $messageBody
+                            """.trimIndent()
                             //showWarningNotification(context, notificationText)
                         SuspiciousSMS.list1.add(notificationText)
 
@@ -63,8 +60,6 @@ class SMSReceiver : BroadcastReceiver() {
             }
         }
     }
-
-
 
     // Displays a high-priority notification alerting the user about
     // a detected malicious URL in an SMS.
@@ -98,8 +93,6 @@ class SMSReceiver : BroadcastReceiver() {
         val manager = context.getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager
         manager.notify(System.currentTimeMillis().toInt(), notification) // unique ID for each notification
     }
-
-
 
     // Sends the given URL to the VirusTotal API to check if it's marked as malicious.
     // Calls onResult(true) if malicious, otherwise false.

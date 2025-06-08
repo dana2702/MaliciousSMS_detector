@@ -15,10 +15,6 @@ class SMSNotificationListener : NotificationListenerService() {
         if (packageName.contains("messaging") || packageName.contains("sms")) {
             val title = extras.getString("android.title") ?: ""
             val text = extras.getString("android.text") ?: ""
-
-//            if ("//http" in text) {
-//                Log.d("SMSNotificationListener", "Suspicious link detected from $title: $text")
-//            }
             val regex = Regex("""((https?|ftp)://\S+|www\.\S+|\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b\S*)""")
             if (regex.containsMatchIn(text)) {
                 Log.d("SMSNotificationListener", "Suspicious link detected from $title: $text")
