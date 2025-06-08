@@ -13,7 +13,9 @@ import androidx.core.app.NotificationCompat
 import okhttp3.OkHttpClient
 import okhttp3.Request
 import okhttp3.Response
-import java.net.URLEncoder
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 
 class SMSReceiver : BroadcastReceiver() {
 
@@ -30,9 +32,13 @@ class SMSReceiver : BroadcastReceiver() {
 
         messages?.forEach { message ->
             val messageBody = message.messageBody
-
+            val sender = message.originatingAddress ?: "Unknown"
+            val timestamp = message.timestampMillis
+            val date = Date(timestamp)
+            val formatter = SimpleDateFormat("dd/mm/yy HH:mm", Locale.getDefault())
+            val formattedDate = formatter.format(date)
             // Look for URLs (can start with either http or https)
-            val regex = Regex("(https?://\\S+)")
+            val regex = Regex("""((https?|ftp)://\S+|www\.\S+|\b[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}\b\S*)""")
             val foundUrls = regex.findAll(messageBody)
 
             for (match in foundUrls) {
@@ -41,6 +47,16 @@ class SMSReceiver : BroadcastReceiver() {
                 // Check the URL using VirusTotal
                 checkUrlWithVirusTotal(context, url) { isMalicious ->
                     if (isMalicious) {
+
+
+                        val notificationText = """
+        Suspicious link detected from $sender on $formattedDate:
+        $url
+        Message: $messageBody
+    """.trimIndent()
+                            //showWarningNotification(context, notificationText)
+                        SuspiciousSMS.list1.add(notificationText)
+
                         showWarningNotification(context, "Malicious link detected: $url")
                     }
                 }

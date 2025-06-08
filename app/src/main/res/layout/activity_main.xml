@@ -1,19 +1,57 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:gravity="center"
-    android:padding="16dp">
+    android:background="#FFFFFF">
 
-    <!-- Info text -->
-    <TextView
-        android:id="@+id/homepageText"
-        android:layout_width="wrap_content"
+    <LinearLayout
+        android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="This app will detect malicious SMS messages.\nNo need to keep it running in the background.\nIt is important you allow access to the app."
-        android:textSize="18sp"
-        android:textColor="@android:color/black"
-        android:gravity="center"
-        android:padding="16dp"/>
-</LinearLayout>
+        android:orientation="vertical"
+        android:padding="24dp"
+        android:gravity="start">
+
+        <!-- רווח למעלה -->
+        <Space
+            android:layout_width="match_parent"
+            android:layout_height="60dp" />
+
+        <!-- כותרת -->
+        <TextView
+            android:id="@+id/titleText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="📱 SMS Threat Monitor"
+            android:textSize="24sp"
+            android:textStyle="bold"
+            android:textColor="#000000"
+            android:paddingBottom="12dp"
+            android:gravity="center" />
+
+        <!-- הוראות שימוש -->
+        <TextView
+            android:id="@+id/instructionsText"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="This app automatically checks incoming SMS messages for suspicious links.\n\nInstructions:\n• Allow SMS and notification permissions.\n• You don’t need to leave the app open.\n• You'll be alerted if any dangerous link is found.\n• The suspicious messages list updates every    \t few seconds.\n• When you close the app, the list is cleared."
+            android:textSize="17sp"
+            android:textColor="#444444"
+            android:lineSpacingExtra="6dp"
+            android:paddingBottom="16dp" />
+
+        <!-- הודעות חשודות -->
+        <TextView
+            android:id="@+id/smsTextView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="(No suspicious messages yet)"
+            android:textSize="17sp"
+            android:textColor="#B00020"
+            android:background="#FFF0F0"
+            android:padding="12dp"
+            android:layout_marginTop="8dp"
+            android:layout_marginBottom="24dp"
+            android:elevation="2dp"
+            android:gravity="start" />
+    </LinearLayout>
+</ScrollView>
