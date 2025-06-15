@@ -4,6 +4,15 @@ This Android app detects suspicious or malicious URLs sent via SMS messages. It 
 
 ---
 
+## 📹 Demo Video
+
+Check out the app in action!
+Click the image below to watch the full demo on YouTube:
+
+[![Watch the demo video](https://img.youtube.com/vi/i_d9d7X_feM/0.jpg)](https://youtu.be/i_d9d7X_feM)
+
+---
+
 ## 🔧 Features
 
 - 📩 Intercepts incoming SMS messages.
@@ -36,3 +45,6 @@ Use ADB to send an SMS:
 
 ```bash
 adb emu sms send 1234567890 "Check this link: http://malicious.com"
+
+
+
